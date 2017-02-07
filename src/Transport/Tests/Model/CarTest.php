@@ -19,7 +19,7 @@ class CarTest extends TestCase
         $car->drive(20);
 
         // test if mileage of the car is 20
-        $this->assertEquals(20, $car->getMileage(), 'Mileage should contain sum of all driven distances');
+        $this->assertSame(20, $car->getMileage(), 'Mileage should contain sum of all driven distances');
 
         // dirve another distances
         $car
@@ -28,7 +28,7 @@ class CarTest extends TestCase
             ->drive(300);
         
         // check if mileage is correctly saved
-        $this->assertEquals(620, $car->getMileage(), 'Mileage should contain sum of all driven distances');
+        $this->assertSame(620, $car->getMileage(), 'Mileage should contain sum of all driven distances');
     }
 
     public function testInvalidDrive()
@@ -41,7 +41,7 @@ class CarTest extends TestCase
             $car->drive(-100);
         } catch (\InvalidArgumentException $e) {
             $car->drive(100);
-            $this->assertEquals(300, $car->getMileage(), 'Mileage should not be changed when passing incorect argument to drive()');
+            $this->assertSame(300, $car->getMileage(), 'Mileage should not be changed when passing incorect argument to drive()');
             
             throw $e;
         }
@@ -52,9 +52,10 @@ class CarTest extends TestCase
         return array(
             array('AAAAAA', 'AAAAAA'),
             array('BBBBBB', 'BBBBBB'),
-            array('', false),
-            array(null, false),
-            array(true, '1')
+            array('', ''),
+            array(null, null),
+            array(true, null),
+            array(10, null)
         );
     }
 
@@ -62,7 +63,7 @@ class CarTest extends TestCase
      * In this test we're using `dataProvider` docblock statement, which indicates
      * a function which is going to supply a values for this test.
      *
-     * This function is excecuted as much as there is arrays returned from `dataProvider`
+     * This function is excecuted as many times as there is arrays returned from `dataProvider`
      * Function is called with parameters from the inner array.
      *
      * @dataProvider registrationProvider
@@ -71,8 +72,13 @@ class CarTest extends TestCase
     {
         $car = new Car();
 
-        $car->setRegistration($registration);
-        $this->assertEquals(
+        try {
+            $car->setRegistration($registration);
+        } catch (\InvalidArgumentException $e) {
+            // let it goooo
+        }
+
+        $this->assertSame(
             $expectedRegistration,
             $car->getRegistration()
         );
@@ -84,7 +90,7 @@ class CarTest extends TestCase
 
         // make sure that car mileage is a numeric value when created
         $this->assertTrue(is_numeric($car->getMileage()), 'Car initial mileage must be integer.');
-        $this->assertEquals(null, $car->getRegistration());
+        $this->assertSame(null, $car->getRegistration());
 
         // generate random number
         $randomNumber = rand(1, 1000);
@@ -109,6 +115,6 @@ class CarTest extends TestCase
             'Car must not allow to change registration other way than using setRegistration()'
         );
         // check if mileage is still correct
-        $this->assertEquals($randomNumber, $car->getMileage(), 'Car must not allow to modify mileage');
+        $this->assertSame($randomNumber, $car->getMileage(), 'Car must not allow to modify mileage');
     }
 }
